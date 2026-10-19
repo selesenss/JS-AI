@@ -38,15 +38,6 @@ function isValidSource1(source) {
   return true
 }
 
-function isValidSource2(source) {
-  if (!Array.isArray(source)) {
-    console.error('Source 2 must be an array.')
-    return false
-  }
-
-  return true
-}
-
 function validateTransaction(transaction) {
   if (
     transaction === null ||
@@ -108,50 +99,38 @@ function parseSource2Item(item) {
   return amount
 }
 
-function calculateSource1Revenue(transactions) {
-  let total = 0
-
-  for (const transaction of transactions) {
-    if (!validateTransaction(transaction)) {
-      continue
-    }
-
-    if (transaction.type === 'paid') {
-      total += transaction.amount
-    }
+// Converts supported source formats to an array of "<amount> USD" strings.
+function adaptSource(source) {
+  if (Array.isArray(source)) {
+    return source.filter(item => parseSource2Item(item) !== null)
   }
 
-  return total
-}
-
-function calculateSource2Revenue(items) {
-  let total = 0
-
-  for (const item of items) {
-    const amount = parseSource2Item(item)
-
-    if (amount === null) {
-      continue
-    }
-
-    total += amount
-  }
-
-  return total
-}
-
-function calculateDailyRevenue(firstSource, secondSource) {
-  if (!isValidSource1(firstSource) || !isValidSource2(secondSource)) {
+  if (!isValidSource1(source)) {
     return null
   }
 
-  const source1Total = calculateSource1Revenue(firstSource.transactions)
-  const source2Total = calculateSource2Revenue(secondSource)
+  return source.transactions
+    .filter(validateTransaction)
+    .filter(transaction => transaction.type === 'paid')
+    .map(transaction => `${transaction.amount} ${transaction.currency}`)
+}
 
-  return {
-    total: source1Total + source2Total,
-    currency: 'USD',
+function calculateDailyRevenue(...sources) {
+  let total = 0
+
+  for (const source of sources) {
+    const items = adaptSource(source)
+
+    if (items === null) {
+      return null
+    }
+
+    for (const item of items) {
+      total += Number(item.trim().split(' ')[0])
+    }
   }
+
+  return { total, currency: 'USD' }
 }
 
 // Examples
