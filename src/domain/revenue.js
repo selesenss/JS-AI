@@ -43,7 +43,7 @@ function validateTransaction(transaction) {
     return false
   }
 
-  if (transaction.currency !== 'USD') {
+  if (typeof transaction.currency !== 'string' || transaction.currency.toUpperCase() !== 'USD') {
     console.error('Invalid transaction: currency must be "USD".', transaction)
     return false
   }
@@ -57,7 +57,7 @@ function parseSource2Item(item) {
     return null
   }
 
-  const match = item.trim().match(/^(\d+(?:\.\d+)?) USD$/)
+  const match = item.trim().match(/^(\d+(?:\.\d+)?) USD$/i)
 
   if (!match) {
     console.error(
@@ -90,7 +90,7 @@ function adaptSource(source) {
   return source.transactions
     .filter(validateTransaction)
     .filter(transaction => transaction.type === 'paid')
-    .map(transaction => `${transaction.amount} ${transaction.currency}`)
+    .map(transaction => `${transaction.amount} USD`)
 }
 
 function calculateDailyRevenue(...sources) {

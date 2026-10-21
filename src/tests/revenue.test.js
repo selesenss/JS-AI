@@ -21,3 +21,20 @@ for (const [name, sources, total] of cases) {
   test(name, () => assert.deepEqual(calculateDailyRevenue(...sources),
     total === null ? null : { total, currency: 'USD' }));
 }
+
+ test('Currency accepts mixed case in both sources and normalizes output', () => {
+  const transactions = ['usd', 'USD', 'UsD'].map(currency => ({
+    type: 'paid', amount: 100, currency,
+  }));
+  assert.deepEqual(calculateDailyRevenue(
+    { transactions }, ['300 usd', '150 USD', '200 UsD'],
+  ), { total: 950, currency: 'USD' });
+});
+
+test('Other currencies and non-string currency remain invalid', () => {
+  assert.deepEqual(calculateDailyRevenue({ transactions: [
+    { type: 'paid', amount: 100, currency: 'EUR' },
+    { type: 'paid', amount: 100, currency: null },
+    { type: 'paid', amount: 100, currency: 123 },
+  ] }, ['300 eur', '50 usd']), { total: 50, currency: 'USD' });
+});
