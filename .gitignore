@@ -1,5 +1,12 @@
-*.dmb
-*.rsc
-*.int
-*.lk
-*.zip
+node_modules
+*.log
+tmp
+.grunt
+.DS_Store
+.idea
+.teamcity
+.vscode
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
